@@ -1,13 +1,23 @@
 {
+  "name": "05-onesbryne-server",
+  "version": "1.0.0",
+  "private": "true",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.2",
     "express": "^4.18.2",
+    "express-error-handler": "^1.1.0",
     "express-validator": "^7.0.1",
     "mongoose": "^8.1.1",
     "passport": "^0.7.0",
-    "passport-jwt": "^4.0.1"
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0"
   }
 }
