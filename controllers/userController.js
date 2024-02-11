@@ -1,61 +1,78 @@
 const User = require("../models/user");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 
 const UserController = {
-  registerUser: async (req, res) => {
+  getAllUsers: async (req, res) => {
     try {
-      const { username, password, email, fullName } = req.body;
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = await User.create({
-        username,
-        password: hashedPassword,
-        email,
-        fullName,
-      });
-      res.status(201).json(newUser);
+      const users = await User.find();
+      res.status(200).json(users);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
 
-  loginUser: async (req, res, next) => {
-    passport.authenticate("local", { session: false }, (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
+  getUserById: async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await User.findById(userId);
 
       if (!user) {
-        return res.status(401).json({ message: info.message });
+        return res.status(404).json({ message: "User not found" });
       }
 
-      // Generate JWT token and send it in the response
-      const token = jwt.sign({ sub: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+      const userCopy = user._doc;
+      delete userCopy.password;
+
+      res.status(200).json({ user: userCopy });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
+
+  updateUserById: async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+        new: true,
+        runValidators: true,
       });
-      res.json({ token });
-    })(req, res, next);
-  },
 
-  getUserProfile: async (req, res) => {
-    try {
-      // Implement logic to retrieve user profile using the User model
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const userProfile = {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      };
+
+      res.status(200).json({ user: userProfile });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
 
-  updateUserProfile: async (req, res) => {
+  deleteUserById: async (req, res) => {
     try {
-      // Implement logic to update user profile using the User model
+      const { userId } = req.params;
+
+      const deletedUser = await User.findByIdAndDelete(userId);
+
+      if (!deletedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   },
-  // Add more controller functions as needed
 };
 
 module.exports = UserController;

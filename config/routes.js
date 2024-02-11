@@ -1,12 +1,14 @@
-const express = require('express');
-const userRoutes = require('../routes/userRoutes');
-const productRoutes = require('../routes/productRoutes');
+const express = require("express");
+const authRoutes = require("../routes/authRoutes");
+const userRoutes = require("../routes/userRoutes");
+const productRoutes = require("../routes/productRoutes");
 
 module.exports = (app) => {
   const router = express.Router();
 
-  router.use('/api/users', userRoutes);
-  router.use('/api/products', productRoutes);
+  router.use("/auth", authRoutes);
+  router.use("/api/users", userRoutes);
+  router.use("/api/products", productRoutes);
 
   app.use(router);
 };
