@@ -12,17 +12,17 @@ router.post(
 );
 router.get(
   "/:productId",
-  ProductController.getProduct,
+  ProductController.getProductById,
   passport.authenticate("jwt", { session: false })
 );
 router.put(
   "/:productId",
-  ProductController.updateProduct,
+  ProductController.updateProductById,
   passport.authenticate("jwt", { session: false })
 );
 router.delete(
   "/:productId",
-  ProductController.deleteProduct,
+  ProductController.deleteProductById,
   passport.authenticate("jwt", { session: false })
 );
 
