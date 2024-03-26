@@ -39,7 +39,7 @@ const AuthController = {
             }
           );
 
-          res.status(200).json({ token: authToken });
+          res.status(200).json({ token: authToken, userId: user._id });
         } catch (error) {
           console.error(error);
           res.status(500).json({ error: "Internal Server Error" });

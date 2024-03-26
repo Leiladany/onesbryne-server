@@ -12,16 +12,14 @@ const UserController = {
   },
 
   getUserById: async (req, res) => {
+    const { userId } = req.params;
+
     try {
-      const { userId } = req.params;
-      const user = await User.findById(userId);
+      const oneUser = await User.findById(userId);
 
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      const userCopy = oneUser._doc;
 
-      const userCopy = user._doc;
-      delete userCopy.password;
+      delete userCopy.passwordHash;
 
       res.status(200).json({ user: userCopy });
     } catch (error) {
@@ -31,26 +29,14 @@ const UserController = {
   },
 
   updateUserById: async (req, res) => {
-    try {
-      const { userId } = req.params;
+    const { userId } = req.params;
 
-      const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+    try {
+      const updatedData = await User.findByIdAndUpdate(userId, req.body, {
         new: true,
-        runValidators: true,
       });
 
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      const userProfile = {
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-      };
-
-      res.status(200).json({ user: userProfile });
+      res.status(200).json({ data: updatedData });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -58,14 +44,10 @@ const UserController = {
   },
 
   deleteUserById: async (req, res) => {
+    const { userId } = req.params;
+
     try {
-      const { userId } = req.params;
-
-      const deletedUser = await User.findByIdAndDelete(userId);
-
-      if (!deletedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      await User.findByIdAndDelete(userId);
 
       res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
