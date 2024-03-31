@@ -30,16 +30,13 @@ const AuthController = {
         }
 
         try {
+          const payload = { userId: user._id, userRole: user.role };
           const authToken = jwt.sign(
-            { userId: user._id },
+            payload,
             process.env.TOKEN_SECRET,
-            {
-              algorithm: "HS256",
-              expiresIn: "4h",
-            }
+            { algorithm: "HS256", expiresIn: "4h" }
           );
-
-          res.status(200).json({ token: authToken, userId: user._id });
+          res.status(200).json({ token: authToken });
         } catch (error) {
           console.error(error);
           res.status(500).json({ error: "Internal Server Error" });
