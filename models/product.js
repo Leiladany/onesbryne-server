@@ -10,10 +10,10 @@ const productSchema = new mongoose.Schema({
   },
   price: { type: Number, required: true },
   description: { type: String, required: true },
-  type: {
+  type: { type: String, required: true },
+  status: {
     type: String,
-    required: true,
-    enum: ["available", "not available", "sold"],
+    default: "Available",
   },
 });
 
