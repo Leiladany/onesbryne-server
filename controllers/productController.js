@@ -1,3 +1,4 @@
+const { deleteFile } = require("../utils/fileManager");
 const Product = require("../models/product");
 
 const ProductController = {
@@ -13,7 +14,11 @@ const ProductController = {
 
   createProduct: async (req, res) => {
     try {
-      const newProduct = await Product.create({ ...req.body });
+      const productData = {
+        ...req.body,
+        img: req.file ? req.file.path : null,
+      };
+      const newProduct = await Product.create(productData);
       res.status(201).json(newProduct);
     } catch (error) {
       console.error(error);
@@ -39,16 +44,26 @@ const ProductController = {
   updateProductById: async (req, res) => {
     try {
       const { productId } = req.params;
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      if (req.file && product.img) {
+        await deleteFile(product.img);
+      }
+
+      const productData = {
+        ...req.body,
+        img: req.file ? req.file.path : product.img,
+      };
+
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,
-        req.body,
+        productData,
         { new: true }
       );
-      if (!updatedProduct) {
-        res.status(404).json({ message: "Product not found" });
-      } else {
-        res.status(200).json({ product: updatedProduct });
-      }
+      res.status(200).json({ product: updatedProduct });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -58,12 +73,15 @@ const ProductController = {
   deleteProductById: async (req, res) => {
     try {
       const { productId } = req.params;
-      const deletedProduct = await Product.findByIdAndDelete(productId);
-      if (!deletedProduct) {
-        res.status(404).json({ message: "Product not found" });
-      } else {
-        res.status(200).send();
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
       }
+
+      await deleteFile(product.img);
+
+      await Product.findByIdAndDelete(productId);
+      res.status(200).json({ message: "Product successfully deleted" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });

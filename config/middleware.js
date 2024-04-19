@@ -1,6 +1,7 @@
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const passport = require("passport");
+const express = require("express");
 require("./passport");
 
 const { logRequests } = require("../middleware/logger");
@@ -15,4 +16,7 @@ module.exports = (app) => {
 
   // AUTH MIDDLEWARE SETUP
   app.use(logRequests);
+
+  // STATIC FILES MIDDLEWARE
+  app.use("/uploads", express.static("uploads"));
 };
