@@ -4,7 +4,8 @@ const passport = require("passport");
 const express = require("express");
 require("./passport");
 
-const { logRequests } = require("./logger");
+const { logRequests } = require("../middlewares/logger");
+const { errorHandler } = require("../middlewares/errorHandler");
 
 module.exports = (app) => {
   app.use(bodyParser.json());
@@ -16,6 +17,9 @@ module.exports = (app) => {
 
   // AUTH MIDDLEWARE SETUP
   app.use(logRequests);
+
+  // ERRO HANDLER
+  app.use(errorHandler);
 
   // STATIC FILES MIDDLEWARE
   app.use("/uploads", express.static("uploads"));

@@ -1,6 +1,6 @@
 const express = require("express");
-const configureDatabase = require("./src/config/database");
-const configureMiddleware = require("./src/config/middleware");
+const configureDatabase = require("./src/configs/database");
+const configureMiddleware = require("./src/configs/middleware");
 const configureRoutes = require("./src/routing/routes");
 const passport = require("passport");
 
