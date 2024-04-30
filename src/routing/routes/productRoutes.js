@@ -1,6 +1,6 @@
 // routes/productRoutes.js
 const express = require("express");
-const upload = require("../config/multer");
+const upload = require("../../config/multer");
 const ProductController = require("../controllers/productController");
 
 const router = express.Router();

@@ -4,7 +4,7 @@ const passport = require("passport");
 const express = require("express");
 require("./passport");
 
-const { logRequests } = require("../middleware/logger");
+const { logRequests } = require("./logger");
 
 module.exports = (app) => {
   app.use(bodyParser.json());
