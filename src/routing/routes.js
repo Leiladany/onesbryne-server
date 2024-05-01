@@ -2,6 +2,7 @@ const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
+const { isAuthenticated } = require("../middlewares/authentication");
 
 module.exports = (app) => {
   const router = express.Router();
@@ -10,8 +11,8 @@ module.exports = (app) => {
   router.use("/auth", authRoutes);
 
   // Routes requiring authentication
-  router.use("/api/users", userRoutes);
-  router.use("/api/products", productRoutes);
+  router.use("/api/users", isAuthenticated, userRoutes);
+  router.use("/api/products", isAuthenticated, productRoutes);
 
   app.use(router);
 };

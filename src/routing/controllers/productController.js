@@ -1,5 +1,5 @@
-const { deleteFile } = require("../../utils/fileManager");
 const Product = require("../../models/product");
+const { deleteFile } = require("../../utils/fileManager");
 
 const ProductController = {
   getAllProducts: async (req, res) => {

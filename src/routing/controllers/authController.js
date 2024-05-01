@@ -1,7 +1,6 @@
-const passport = require("passport");
+const User = require("../../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../../models/user");
 
 const AuthController = {
   signupUser: async (req, res) => {
@@ -16,33 +15,27 @@ const AuthController = {
     }
   },
 
-  loginUser: async (req, res, next) => {
-    passport.authenticate(
-      "local",
-      { session: false },
-      async (err, user, info) => {
-        if (err) {
-          return next(err);
-        }
+  loginUser: async (req, res) => {
+    const { email, password } = req.body;
+    const potentialUser = await User.findOne({ email });
+    if (potentialUser) {
+      if (bcrypt.compareSync(password, potentialUser.passwordHash)) {
+        const authToken = jwt.sign(
+          { userId: potentialUser._id, userRole: potentialUser.role },
+          process.env.TOKEN_SECRET,
+          {
+            algorithm: "HS256",
+            expiresIn: "4h",
+          }
+        );
 
-        if (!user) {
-          return res.status(401).json({ message: info.message });
-        }
-
-        try {
-          const payload = { userId: user._id, userRole: user.role };
-          const authToken = jwt.sign(
-            payload,
-            process.env.TOKEN_SECRET,
-            { algorithm: "HS256", expiresIn: "4h" }
-          );
-          res.status(200).json({ token: authToken });
-        } catch (error) {
-          console.error(error);
-          res.status(500).json({ error: "Internal Server Error" });
-        }
+        res.status(200).json({ token: authToken });
+      } else {
+        res.status(400).json({ message: "Incorrect password." });
       }
-    )(req, res, next);
+    } else {
+      res.status(400).json({ message: "Incorrect email" });
+    }
   },
 };
 

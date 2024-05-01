@@ -1,26 +1,24 @@
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const passport = require("passport");
 const express = require("express");
-require("./passport");
+const logger = require("morgan");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
-const { logRequests } = require("../middlewares/logger");
-const { errorHandler } = require("../middlewares/errorHandler");
+const FRONTEND_URL = process.env.ORIGIN || "http://localhost:5173";
 
 module.exports = (app) => {
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(cors());
+  app.set("trust proxy", 1);
 
-  // PASSPORT SETUP
-  app.use(passport.initialize());
+  app.use(
+    cors({
+      origin: [FRONTEND_URL],
+    })
+  );
 
-  // AUTH MIDDLEWARE SETUP
-  app.use(logRequests);
+  app.use(logger("dev"));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+  app.use(cookieParser());
 
-  // ERRO HANDLER
-  app.use(errorHandler);
-
-  // STATIC FILES MIDDLEWARE
+  // Static files middleware
   app.use("/uploads", express.static("uploads"));
 };

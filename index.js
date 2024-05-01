@@ -1,14 +1,14 @@
 const express = require("express");
 const configureDatabase = require("./src/configs/database");
 const configureMiddleware = require("./src/configs/middleware");
+const configureErrorHandler = require("./src/middlewares/errorHandler");
 const configureRoutes = require("./src/routing/routes");
-const passport = require("passport");
 
 const app = express();
 
-// CONFIGURATION
 configureDatabase();
-configureMiddleware(app, passport);
+configureMiddleware(app);
 configureRoutes(app);
+configureErrorHandler(app);
 
 module.exports = app;
