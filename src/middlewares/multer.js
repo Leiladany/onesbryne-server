@@ -1,11 +1,18 @@
 const multer = require("multer");
 
+let fileIndex = 0;
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
+    const index = fileIndex ++;
+    const name = file.originalname;
+    const date = Date.now();
+
+    const filename = `${index}-${name}-${date}`;
+    cb(null, filename);
   },
 });
 
