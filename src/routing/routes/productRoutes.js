@@ -2,8 +2,7 @@ const ProductController = require("../controllers/productController");
 const express = require("express");
 const router = express.Router();
 const { isAdmin } = require("../../middlewares/authentication");
-
-const upload = require("../../configs/multer");
+const upload = require("../../middlewares/multer");
 
 router.get("/", ProductController.getAllProducts);
 router.post(

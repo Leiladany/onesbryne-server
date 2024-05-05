@@ -1,5 +1,5 @@
 const Product = require("../../models/product");
-const { deleteFile } = require("../../utils/fileManager");
+const fs = require("fs");
 
 const ProductController = {
   getAllProducts: async (req, res) => {
@@ -49,18 +49,20 @@ const ProductController = {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      if (req.file && product.img) {
-        await deleteFile(product.img);
+      // Check if a new image is uploaded
+      if (req.file) {
+        // If a new image is uploaded, delete the previous image
+        if (product.img) {
+          // Delete the previous image
+          fs.unlinkSync(product.img);
+        }
+        // Update the image path
+        product.img = req.file.path;
       }
-
-      const productData = {
-        ...req.body,
-        img: req.file ? req.file.path : product.img,
-      };
 
       const updatedProduct = await Product.findByIdAndUpdate(
         productId,
-        productData,
+        { $set: product },
         { new: true }
       );
       res.status(200).json({ product: updatedProduct });
@@ -78,7 +80,9 @@ const ProductController = {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      await deleteFile(product.img);
+      if (product.img && fs.existsSync(product.img)) {
+        fs.unlinkSync(product.img);
+      }
 
       await Product.findByIdAndDelete(productId);
       res.status(200).json({ message: "Product successfully deleted" });
