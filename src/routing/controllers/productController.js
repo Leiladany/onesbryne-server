@@ -49,6 +49,12 @@ const ProductController = {
         return res.status(404).json({ message: "Product not found" });
       }
 
+      product.name = req.body.name;
+      product.size = req.body.size;
+      product.price = req.body.price;
+      product.description = req.body.description;
+      product.type = req.body.type;
+
       // Check if a new image is uploaded
       if (req.file) {
         // If a new image is uploaded, delete the previous image
@@ -60,11 +66,7 @@ const ProductController = {
         product.img = req.file.path;
       }
 
-      const updatedProduct = await Product.findByIdAndUpdate(
-        productId,
-        { $set: product },
-        { new: true }
-      );
+      const updatedProduct = await product.save();
       res.status(200).json({ product: updatedProduct });
     } catch (error) {
       console.error(error);
