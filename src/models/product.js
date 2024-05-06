@@ -13,7 +13,7 @@ const productSchema = new Schema({
   type: { type: String, required: true },
   status: {
     type: String,
-    default: "Available",
+    default: "Disponível",
   },
 });
 
