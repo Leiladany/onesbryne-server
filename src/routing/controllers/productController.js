@@ -54,6 +54,7 @@ const ProductController = {
       product.price = req.body.price;
       product.description = req.body.description;
       product.type = req.body.type;
+      product.status = req.body.status;
 
       // Check if a new image is uploaded
       if (req.file) {
