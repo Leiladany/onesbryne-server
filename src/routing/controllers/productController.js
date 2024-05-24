@@ -1,11 +1,12 @@
-const Product = require("../../models/product");
 const fs = require("fs");
+const supabase = require("../../configs/supabase");
 
 const ProductController = {
   getAllProducts: async (req, res) => {
     try {
-      const products = await Product.find();
-      res.status(200).json(products);
+      const { data, error } = await supabase.from("products").select("*");
+      if (error) throw error;
+      res.status(200).json(data);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -18,8 +19,11 @@ const ProductController = {
         ...req.body,
         img: req.file ? req.file.path : null,
       };
-      const newProduct = await Product.create(productData);
-      res.status(201).json(newProduct);
+      const { data, error } = await supabase
+        .from("products")
+        .insert([productData]);
+      if (error) throw error;
+      res.status(201).json(data);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -27,13 +31,18 @@ const ProductController = {
   },
 
   getProductById: async (req, res) => {
+    const { productId } = req.params;
     try {
-      const { productId } = req.params;
-      const product = await Product.findById(productId);
-      if (!product) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+      if (error) throw error;
+      if (!data) {
         res.status(404).json({ message: "Product not found" });
       } else {
-        res.status(200).json(product);
+        res.status(200).json(data);
       }
     } catch (error) {
       console.error(error);
@@ -42,33 +51,35 @@ const ProductController = {
   },
 
   updateProductById: async (req, res) => {
+    const { productId } = req.params;
     try {
-      const { productId } = req.params;
-      const product = await Product.findById(productId);
+      const { data: product, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+      if (error) throw error;
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      product.name = req.body.name;
-      product.size = req.body.size;
-      product.price = req.body.price;
-      product.description = req.body.description;
-      product.type = req.body.type;
-      product.status = req.body.status;
+      const updatedProductData = {
+        ...req.body,
+        img: req.file ? req.file.path : product.img,
+      };
 
-      // Check if a new image is uploaded
-      if (req.file) {
-        // If a new image is uploaded, delete the previous image
-        if (product.img) {
-          // Delete the previous image
-          fs.unlinkSync(product.img);
-        }
-        // Update the image path
-        product.img = req.file.path;
+      if (req.file && product.img) {
+        fs.unlinkSync(product.img);
       }
 
-      const updatedProduct = await product.save();
-      res.status(200).json({ product: updatedProduct });
+      const { data, updateError } = await supabase
+        .from("products")
+        .update(updatedProductData)
+        .eq("id", productId);
+
+      if (updateError) throw updateError;
+
+      res.status(200).json(data);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -76,9 +87,14 @@ const ProductController = {
   },
 
   deleteProductById: async (req, res) => {
+    const { productId } = req.params;
     try {
-      const { productId } = req.params;
-      const product = await Product.findById(productId);
+      const { data: product, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+      if (error) throw error;
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -87,7 +103,12 @@ const ProductController = {
         fs.unlinkSync(product.img);
       }
 
-      await Product.findByIdAndDelete(productId);
+      const { deleteError } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", productId);
+      if (deleteError) throw deleteError;
+
       res.status(200).json({ message: "Product successfully deleted" });
     } catch (error) {
       console.error(error);

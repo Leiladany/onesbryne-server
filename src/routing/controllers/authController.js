@@ -1,40 +1,35 @@
-const User = require("../../models/user");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const supabase = require("../../configs/supabase");
 
 const AuthController = {
   signupUser: async (req, res) => {
-    const salt = bcrypt.genSaltSync(13);
-    const passwordHash = bcrypt.hashSync(req.body.password, salt);
+    const { email, password } = req.body;
     try {
-      const newUser = await User.create({ ...req.body, passwordHash });
-      res.status(201).json(newUser);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+      console.log(data)
+      res.status(201).json({ data });
     } catch (error) {
-      console.log(error);
-      res.status(400).json(error);
+      console.error(error);
+      res.status(400).json({ error: error.message });
     }
   },
 
   loginUser: async (req, res) => {
     const { email, password } = req.body;
-    const potentialUser = await User.findOne({ email });
-    if (potentialUser) {
-      if (bcrypt.compareSync(password, potentialUser.passwordHash)) {
-        const authToken = jwt.sign(
-          { userId: potentialUser._id, userRole: potentialUser.role },
-          process.env.TOKEN_SECRET,
-          {
-            algorithm: "HS256",
-            expiresIn: "4h",
-          }
-        );
-
-        res.status(200).json({ token: authToken });
-      } else {
-        res.status(400).json({ message: "Incorrect password." });
-      }
-    } else {
-      res.status(400).json({ message: "Incorrect email" });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      console.log(data)
+      res.status(200).json({ data });
+    } catch (error) {
+      console.error(error);
+      res.status(400).json({ error: error.message });
     }
   },
 };
