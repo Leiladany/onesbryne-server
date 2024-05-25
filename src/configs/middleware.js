@@ -18,7 +18,4 @@ module.exports = (app) => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
-
-  // Static files middleware
-  app.use("/uploads", express.static("uploads"));
 };

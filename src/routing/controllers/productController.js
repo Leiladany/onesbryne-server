@@ -15,10 +15,6 @@ const ProductController = {
 
   createProduct: async (req, res) => {
     try {
-      const productData = {
-        ...req.body,
-        img: req.file ? req.file.path : null,
-      };
       const { data, error } = await supabase
         .from("products")
         .insert([productData]);
@@ -62,11 +58,6 @@ const ProductController = {
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-
-      const updatedProductData = {
-        ...req.body,
-        img: req.file ? req.file.path : product.img,
-      };
 
       if (req.file && product.img) {
         fs.unlinkSync(product.img);
