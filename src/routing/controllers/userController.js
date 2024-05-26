@@ -1,7 +1,7 @@
 const supabase = require("../../configs/supabase");
 
 const UserController = {
-  getAllUsers: async (req, res) => {
+  getUsers: async (req, res) => {
     try {
       const { data, error } = await supabase.from("users").select("*");
       if (error) throw error;
@@ -20,14 +20,10 @@ const UserController = {
         .select("*")
         .eq("id", userId)
         .single();
+
       if (error) throw error;
-      if (data) {
-        const userCopy = { ...data };
-        delete userCopy.passwordHash;
-        res.status(200).json({ user: userCopy });
-      } else {
-        res.status(404).json({ message: "User not found" });
-      }
+
+      res.status(200).json({ user: data });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -36,26 +32,26 @@ const UserController = {
 
   updateUserById: async (req, res) => {
     const { userId } = req.params;
-    try {
-      const { data, error } = await supabase
-        .from("users")
-        .update(req.body)
-        .eq("id", userId)
-        .select();
-      if (error) throw error;
-      res.status(200).json({ data });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  },
+    const { newName, newEmail } = req.body;
 
-  deleteUserById: async (req, res) => {
-    const { userId } = req.params;
     try {
-      const { error } = await supabase.from("users").delete().eq("id", userId);
-      if (error) throw error;
-      res.status(200).json({ message: "User deleted successfully" });
+      // Update user's email in the authentication table
+      const { error: authUpdateError } = await supabase.auth.updateUser({
+        id: userId,
+        email: newEmail,
+      });
+
+      if (authUpdateError) throw authUpdateError;
+
+      // Update user's name and email in the users table
+      const { error: dataUpdateError } = await supabase
+        .from("users")
+        .update({ name: newName, email: newEmail })
+        .eq("id", userId);
+
+      if (dataUpdateError) throw dataUpdateError;
+
+      res.status(200).json({ message: "User updated successfully" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
