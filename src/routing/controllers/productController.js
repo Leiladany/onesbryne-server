@@ -14,11 +14,16 @@ const ProductController = {
   },
 
   createProduct: async (req, res) => {
+    const { name, img, size, price, description, type, status } = req.body;
+    const productData = { name, img, size, price, description, type, status };
     try {
       const { data, error } = await supabase
         .from("products")
-        .insert([productData]);
+        .insert(productData)
+        .select();
+
       if (error) throw error;
+
       res.status(201).json(data);
     } catch (error) {
       console.error(error);
@@ -34,7 +39,9 @@ const ProductController = {
         .select("*")
         .eq("id", productId)
         .single();
+
       if (error) throw error;
+
       if (!data) {
         res.status(404).json({ message: "Product not found" });
       } else {
@@ -48,29 +55,22 @@ const ProductController = {
 
   updateProductById: async (req, res) => {
     const { productId } = req.params;
+    const { name, img, size, price, description, type, status } = req.body;
+    const productData = { name, img, size, price, description, type, status };
     try {
-      const { data: product, error } = await supabase
+      const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .update(productData)
         .eq("id", productId)
-        .single();
+        .select();
+
       if (error) throw error;
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
+
+      if (!data) {
+        res.status(404).json({ message: "Product not found" });
+      } else {
+        res.status(200).json(data);
       }
-
-      if (req.file && product.img) {
-        fs.unlinkSync(product.img);
-      }
-
-      const { data, updateError } = await supabase
-        .from("products")
-        .update(updatedProductData)
-        .eq("id", productId);
-
-      if (updateError) throw updateError;
-
-      res.status(200).json(data);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -80,25 +80,12 @@ const ProductController = {
   deleteProductById: async (req, res) => {
     const { productId } = req.params;
     try {
-      const { data: product, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .single();
-      if (error) throw error;
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-
-      if (product.img && fs.existsSync(product.img)) {
-        fs.unlinkSync(product.img);
-      }
-
-      const { deleteError } = await supabase
+      const { error } = await supabase
         .from("products")
         .delete()
         .eq("id", productId);
-      if (deleteError) throw deleteError;
+
+      if (error) throw error;
 
       res.status(200).json({ message: "Product successfully deleted" });
     } catch (error) {

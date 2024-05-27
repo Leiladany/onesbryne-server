@@ -13,6 +13,6 @@ router.put(
   "/:productId",
   ProductController.updateProductById
 );
-router.delete("/:productId", isAdmin, ProductController.deleteProductById);
+router.delete("/:productId", ProductController.deleteProductById);
 
 module.exports = router;
