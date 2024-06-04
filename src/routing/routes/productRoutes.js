@@ -4,15 +4,9 @@ const router = express.Router();
 const { isAdmin } = require("../../middlewares/authentication");
 
 router.get("/", ProductController.getAllProducts);
-router.post(
-  "/",
-  ProductController.createProduct
-);
+router.post("/", isAdmin, ProductController.createProduct);
 router.get("/:productId", ProductController.getProductById);
-router.put(
-  "/:productId",
-  ProductController.updateProductById
-);
-router.delete("/:productId", ProductController.deleteProductById);
+router.put("/:productId", isAdmin, ProductController.updateProductById);
+router.delete("/:productId", isAdmin, ProductController.deleteProductById);
 
 module.exports = router;

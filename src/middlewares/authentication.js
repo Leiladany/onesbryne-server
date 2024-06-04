@@ -1,48 +1,40 @@
-const jwt = require("jsonwebtoken");
+const supabase = require("../configs/supabase");
 
-const isAuthenticated = (req, res, next) => {
+const isAdmin = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.headers.authorization.split(" ")[1];
 
-    if (!authHeader) {
-      return res.status(401).json("Authorization header missing");
+    if (!token) {
+      console.error("Authorization token not found");
     }
 
-    const token = authHeader.split(" ")[1];
-    const payload = jwt.verify(token, process.env.TOKEN_SECRET);
+    const { data: authUserData, error: authUserError } = await supabase.auth.getUser(token);
+    
+    if (authUserError || !authUserData) {
+      console.error("Failed to authenticate user:", error);
+    }
+    
+    const authUserId = authUserData.user.id
 
-    req.payload = payload;
-    next();
-  } catch (error) {
-    console.error("Authentication error:", error.message);
-    res.status(401).json("Token not provided or not valid");
-  }
-};
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", authUserId)
+      .single();
 
-const isAdmin = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json("Authorization header missing");
+    if (userError || !userData) {
+      console.error("Failed to fetch user data:", error);
     }
 
-    const token = authHeader.split(" ")[1];
-    const payload = jwt.verify(token, process.env.TOKEN_SECRET);
-
-    req.payload = payload;
-
-    console.log(payload);
-
-    if (payload.userRole !== "admin") {
-      return res.status(403).json("Unauthorized access");
+    if (userData.role !== "admin") {
+      console.error("User is not an admin");
     }
 
     next();
   } catch (error) {
     console.error("Authorization error:", error.message);
-    res.status(403).json("Unauthorized access");
+    res.status(403).json({ message: "Unauthorized access" });
   }
 };
 
-module.exports = { isAuthenticated, isAdmin };
+module.exports = { isAdmin };
