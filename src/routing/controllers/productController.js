@@ -14,8 +14,18 @@ const ProductController = {
   },
 
   createProduct: async (req, res) => {
-    const { name, img, size, price, description, type, status } = req.body;
-    const productData = { name, img, size, price, description, type, status };
+    const { code, name, img, size, price, description, type, status } =
+      req.body;
+    const productData = {
+      code,
+      name,
+      img,
+      size,
+      price,
+      description,
+      type,
+      status,
+    };
     try {
       const { data, error } = await supabase
         .from("products")
@@ -55,8 +65,18 @@ const ProductController = {
 
   updateProductById: async (req, res) => {
     const { productId } = req.params;
-    const { name, img, size, price, description, type, status } = req.body;
-    const productData = { name, img, size, price, description, type, status };
+    const { code, name, img, size, price, description, type, status } =
+      req.body;
+    const productData = {
+      code,
+      name,
+      img,
+      size,
+      price,
+      description,
+      type,
+      status,
+    };
     try {
       const { data, error } = await supabase
         .from("products")
