@@ -4,7 +4,10 @@ const supabase = require("../../configs/supabase");
 const ProductController = {
   getAllProducts: async (req, res) => {
     try {
-      const { data, error } = await supabase.from("products").select("*");
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("code", { ascending: true });
       if (error) throw error;
       res.status(200).json(data);
     } catch (error) {
